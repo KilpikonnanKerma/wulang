@@ -6,6 +6,7 @@ typedef enum {
     NODE_VAR_DECL,
     NODE_BIN_OP,
     NODE_LITERAL,
+    NODE_IDENTIFIER,
     NODE_RETURN,
 } ASTNodeType;
 
@@ -20,7 +21,7 @@ typedef struct ASTNode {
 
         struct {
             char* name;
-            int value;
+            struct ASTNode* expr;
         } var_decl;
 
         struct {
@@ -29,6 +30,7 @@ typedef struct ASTNode {
         } bin_op;
 
         int literal;
+        char* identifier;
     } data;
 
     struct ASTNode* next;

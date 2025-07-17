@@ -21,6 +21,12 @@ int main(int argc, char** argv) {
     }
 
     const char* source_path = argv[1];
+    const char* output_path = "out.asm";
+
+    if(argc >= 4 && strcmp(argv[2], "-o") == 0) {
+        output_path = argv[3];
+    }
+
     char* source = preprocess_includes(source_path);
     if(!source) {
         fprintf(stderr, "Failed to read source file: %s\n", source_path);
@@ -29,9 +35,9 @@ int main(int argc, char** argv) {
 
     Token* tokens = tokenize(source);
     ASTNode* ast = parse(tokens);
-    generate_code(ast, "out.asm");
+    generate_code(ast, output_path);
 
-    printf("Assembly written to out.asm\n");
+    printf("Assembly written to %s\n", output_path);
 
     free(source);
     return 0;
