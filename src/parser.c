@@ -39,6 +39,10 @@ static ASTNode* parse_var_decl() {
 
     ASTNode* value = parse_expression();
 
+    if(!value) {
+        fprintf(stderr, "parse_var_decl: value is NULL\n");
+    }
+
     ENSURE(peek().type == TOKEN_SEMI, "Expected ';' after variable declaration");
     advance(); // ;
 
@@ -97,17 +101,17 @@ static ASTNode* parse_expression() {
 
 
 ASTNode* parse(Token* tokens) {
+    current = tokens;
+
     if (peek().type == TOKEN_EOF) {
         fprintf(stderr, "Unexpected end of input!\n");
         exit(1);
     }
 
-    current = tokens;
-
     ASTNode* root = safe_calloc(1, sizeof(ASTNode));
     root->type = NODE_FUNCTION;
     root->data.function.name = strdup("main");
-    root->data.function.body = safe_calloc(16, sizeof(ASTNode*));
+    root->data.function.body = safe_calloc(128, sizeof(ASTNode*));
     root->data.function.body_len = 0;
 
     advance(); // fn

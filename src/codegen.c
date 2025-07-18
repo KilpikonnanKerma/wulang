@@ -13,6 +13,11 @@ static int symbol_count = 0;
 static int current_offset = 0;
 
 static int get_stack_offset(const char* name) {
+    if(!name) {
+        fprintf(stderr, "get_stack_offset() called with NULL\n");
+        exit(1);
+    }
+
     for(int i = 0; i < symbol_count; i++) {
         if(strcmp(symbols[i].name, name) == 0) {
             return symbols[i].stack_offset;
@@ -27,6 +32,8 @@ static void add_symbol(const char* name) {
         fprintf(stderr, "add_symbol() called with NULL\n");
         exit(1);
     }
+
+    printf("[add_symbol] Adding variable: %s\n", name);
     
     symbols[symbol_count].name = strdup(name);
     current_offset += 8;
@@ -35,6 +42,11 @@ static void add_symbol(const char* name) {
 }
 
 static void gen_expr(FILE* out, ASTNode* node) {
+    if (!node) {
+        fprintf(stderr, "gen_expr called with NULL node!\n");
+        exit(1);
+    }
+
     switch (node->type) {
         case NODE_LITERAL:
             fprintf(out, "    mov rax, %d\n", node->data.literal);
@@ -61,6 +73,18 @@ static void gen_expr(FILE* out, ASTNode* node) {
 }
 
 static void gen_stmt(FILE* out, ASTNode* node) {
+    if (!node) {
+        fprintf(stderr, "gen_stmt called with NULL node!\n");
+        exit(1);
+    }
+    printf("[gen_stmt] Got stmt type: %d\n", node->type);
+    fflush(stdout);
+    if (node->type == NODE_VAR_DECL) {
+        printf("  name: %s\n", node->data.var_decl.name ? node->data.var_decl.name : "NULL");
+        printf("  expr: %p\n", (void*)node->data.var_decl.expr);
+        fflush(stdout);
+    }
+
     if (node->type == NODE_VAR_DECL) {
         printf("[gen_stmt] Got stmt type: %d\n", node->type);
         if (node->type == NODE_VAR_DECL) {
@@ -78,6 +102,19 @@ static void gen_stmt(FILE* out, ASTNode* node) {
 }
 
 void generate_code(ASTNode* ast, const char* output_path) {
+    symbol_count = 0;
+    current_offset = 0;
+
+    printf("AST body_len: %d\n", ast->data.function.body_len);
+    for (int i = 0; i < ast->data.function.body_len; i++) {
+        ASTNode* node = ast->data.function.body[i];
+        if (node) {
+            printf("Node %d type: %d\n", i, node->type);
+        } else {
+            printf("Node %d is NULL\n", i);
+        }
+    }
+
     FILE* out = fopen(output_path, "w");
 
     if(!out) {

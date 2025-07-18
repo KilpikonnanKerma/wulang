@@ -33,8 +33,14 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    printf("Tokenizing...\n");
     Token* tokens = tokenize(source);
+
+    printf("Parsing...\n");
     ASTNode* ast = parse(tokens);
+
+    printf("Generating code...\n");
+    fflush(stdout);
     generate_code(ast, output_path);
 
     printf("Assembly written to %s\n", output_path);

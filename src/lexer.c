@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
 #include "lexer.h"
@@ -17,12 +18,18 @@ static char* strndup(const char* s, size_t n) {
 }
 
 static void add_token(TokenType type, const char* start, int length) {
+    if (token_index >= MAX_TOKENS) {
+        fprintf(stderr, "Too many tokens!\n");
+        exit(1);
+    }
     Token* t = &tokens[token_index++];
     t->type = type;
     t->lexeme = strndup(start, length);
 }
 
 Token* tokenize(const char* source) {
+    token_index = 0;
+
     const char* p = source;
 
     while(*p) {
@@ -34,9 +41,9 @@ Token* tokenize(const char* source) {
 
             int len = p - start;
 
-            if(strncmp(start, "fn", len) == 0 ) add_token(TOKEN_FN, start, len);
-            else if(strncmp(start, "int", len) == 0 ) add_token(TOKEN_INT, start, len);
-            else if(strncmp(start, "return", len) == 0 ) add_token(TOKEN_RETURN, start, len);
+            if(len == 2 && strncmp(start, "fn", 2) == 0 ) add_token(TOKEN_FN, start, len);
+            else if(len == 3 && strncmp(start, "int", 3) == 0 ) add_token(TOKEN_INT, start, len);
+            else if(len == 6 && strncmp(start, "return", 6) == 0 ) add_token(TOKEN_RETURN, start, len);
             else add_token(TOKEN_IDENTIFIER, start, len);
 
             continue;
